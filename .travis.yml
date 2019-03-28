@@ -1,3 +1,9 @@
+env:
+  global:
+   # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
+   #   via the "travis encrypt" command using the project repo's public key
+   - secure: "pFodxFnu3YZP01TW9Yq5Yh7ZVwHsRLxhPFRYMRycj6/mcDKwNzleqZy+utIFLb9yYJRKGayW6fCrhhLW5fTof+tBz1mrRG2ADz0TYTaCR58QDJ5LOcfJt4+UXGRguwDeR9BoI+b3lLYuF+xlH8WTTtugBFHK6ELA/tFlhqz5VkOeyQ/al8Fl/8W3Uz6x0hxtFRLDJiWkujsp9xyZKLlYGbLTVszr+tNPjDdPggpiR43wf1vfSRGxQYWePpBQI1yNrZxWgBeKDjbJNuls6mlG0x6PKLm178kiUgBCz1xMDa/aZyzMC70VBcmQzj+Lfv4kU0bYoDZiUFZDH4FO2OL0Kp8Ek1ZV4HGPCMDwrvLT6/Lvbk/TbDe/IPcOnatiWiQ7pt4LlYGkvZ5LxZx7HyVG3uXxXmz/49VjFNJLc6e8n3npqw6zQIjlkab1cc+is+zbEytGETN+NzY8x+Z/8SGUeAZCyl/htwsZWJbvw4y2QmJkj2tabSpIbfb4lFM6PCOFGqd44k6jMvO+iF4cFsqio8R/S0TybOvVfPz17E+3RfP6vjL6laqk1XBY29bbijkv9HIgZc59mPxiGUNYz/qlQ16yY34yni+kgHxaFbYPvtq7nxlkVIHclo7BvXpGWqi8JcWS2oX+Ui0lfMCUlu8zY34jZizRPmURBcSbsUjcjSY="
+
 language: node_js
 os:
   - linux
@@ -6,9 +12,10 @@ os:
 node_js:
   - 10.15
 before_install:
+  - echo -n | openssl s_client -connect https://scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
   - curl https://sh.rustup.rs > rustup.sh && chmod +x rustup.sh && ./rustup.sh -y
-install:
   - PATH="$PATH:$HOME/.cargo/bin" npm install
+install:
   - PATH="$PATH:$HOME/.cargo/bin" npm run build
 cache:
   directories:
@@ -17,5 +24,12 @@ cache:
 addons:
   apt:
     update: true
+  coverity_scan:
+    project:
+      name: "glacambre/firenvim"
+      description: "Embed Neovim in your browser."
+    notification_email: code@lacamb.re
+    build_command: 'PATH="$PATH:$HOME/.cargo/bin" npm run build'
+    branch_pattern: coverity_scan
 git:
   depth: false
