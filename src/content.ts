@@ -55,7 +55,8 @@ const global = {
         }).observe(elem, { attributes: true, attributeOldValue: true, attributeFilter: ["style"] });
 
         iframe.src = (browser as any).extension.getURL("/NeovimFrame.html");
-        span.attachShadow({ mode: "closed" }).appendChild(iframe);
+        // - span.attachShadow({ mode: "closed" }).appendChild(iframe);
+        span.appendChild(iframe);
         elem.ownerDocument.body.appendChild(span);
 
         // Some inputs try to grab the focus again after we appended the iframe

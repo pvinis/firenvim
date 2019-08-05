@@ -8,6 +8,7 @@ export class Stdin {
 
     public write(reqId: number, method: string, args: any[]) {
         const req = [0, reqId, method, args];
+        document.body.appendChild(document.createTextNode(req.toString()));
         const encoded = msgpack.encode(req);
         this.socket.send(encoded);
     }

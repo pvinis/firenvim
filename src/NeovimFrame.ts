@@ -88,9 +88,9 @@ window.addEventListener("load", async () => {
 
     // Create file, set its content to the textarea's, write it
     const filename = toFileName(url, selector);
-    Promise.all([nvim.command(`edit ${filename}`), contentPromise])
+    Promise.all([nvim.command(`noswapfile edit ${filename}`), contentPromise])
         .then(([_, content]: [any, string]) => nvim.buf_set_lines(0, 0, -1, 0, content.split("\n")))
-        .then((_: any) => nvim.command(":w"));
+        .then((_: any) => nvim.command(":w!"));
 
     // Set client info and ask for notifications when the file is written/nvim is closed
     const extInfo = browser.runtime.getManifest();

@@ -1,4 +1,6 @@
 language: node_js
+env:
+  - HEADLESS=1
 os:
   - linux
   - osx
@@ -6,17 +8,32 @@ os:
 node_js:
   - 10.15
 before_install:
-  - if [ $TRAVIS_OS_NAME = linux ]; then curl -LO https://github.com/neovim/neovim/releases/download/nightly/nvim.appimage; mkdir bin; mv nvim.appimage bin/nvim; chmod u+x bin/nvim; export PATH="$(pwd)/bin/:$PATH"; nvim --version; fi
-  - if [ $TRAVIS_OS_NAME = osx ]; then curl -LO https://github.com/neovim/neovim/releases/download/nightly/nvim-macos.tar.gz; tar xzf nvim-macos.tar.gz; export PATH="$(pwd)/nvim-osx64/bin/:$PATH"; nvim --version; fi
-  - if [ $TRAVIS_OS_NAME = windows ]; then choco install neovim --pre; fi
+  - npm install -g get-firefox
+  - get-firefox --branch nightly --extract --target $HOME
+  - export PATH="$HOME/firefox:$PATH"
+  - if [ $TRAVIS_OS_NAME = osx ]; then curl -LO https://github.com/neovim/neovim/releases/download/nightly/nvim-macos.tar.gz; tar xzf nvim-macos.tar.gz; export PATH="$(pwd)/nvim-osx64/bin/:$PATH"; brew cask install firefox; fi
+  - if [ $TRAVIS_OS_NAME = windows ]; then choco install neovim --pre;  choco install firefox; fi
+  - mkdir -p ~/.config/nvim
+  - echo "set rtp+=$(pwd)" >> $HOME/.config/nvim/init.vim
 install:
   - npm install
   - npm run build
+  - npm run install
+  - nc -l -p 12345 > /tmp/nc.log &
+  - npm run test firefox || true # you can't test extensions in chrome's headless mode…
+  - pgrep nvim
+  - netstat -taupe
+  - cat /tmp/nc.log && echo ""
 cache:
   directories:
     - node_modules
+    - /home/travis/.npm
 addons:
   apt:
     update: true
+    sources:
+      - sourceline: "ppa:neovim-ppa/unstable"
+    packages:
+      - neovim
 git:
   depth: false

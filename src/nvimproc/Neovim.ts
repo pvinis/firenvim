@@ -15,14 +15,28 @@ export async function neovim(
     let reqId = 0;
     const requests = new Map<number, { resolve: any, reject: any }>();
 
+    document.body.appendChild(document.createTextNode(`Creating websocket ${port}/${password}`));
     const socket = new WebSocket(`ws://127.0.0.1:${port}/${password}`);
-    document.addEventListener("beforeunload", () => socket.close());
+    document.body.appendChild(document.createTextNode("WebSocket created."));
+    document.addEventListener("error", (err) => {
+        document.body.appendChild(document.createTextNode(err.toString()));
+    });
+    document.addEventListener("beforeunload", () => {
+        document.body.appendChild(document.createTextNode("beforeunload"));
+        socket.close()
+    });
     socket.binaryType = "arraybuffer";
     socket.addEventListener("close", ((_: any) => {
+        document.body.appendChild(document.createTextNode("socket closed"));
         console.log(`Port disconnected for element ${selector}.`);
-        page.killEditor(selector);
+        // - page.killEditor(selector);
     }));
-    await (new Promise(resolve => socket.addEventListener("open", resolve)));
+    document.body.appendChild(document.createTextNode("listeners created"));
+    await (new Promise(resolve => socket.addEventListener("open", () => {
+        document.body.appendChild(document.createTextNode("socket open"));
+        resolve();
+    })));
+    document.body.appendChild(document.createTextNode("socket opened"));
     stdin = new Stdin(socket);
     stdout = new Stdout(socket);
 
@@ -71,6 +85,7 @@ export async function neovim(
         }
     });
 
+    document.body.appendChild(document.createTextNode("before nvim_get_api_info"));
     const { 1: apiInfo } = (await request("nvim_get_api_info", [])) as INvimApiInfo;
     return apiInfo.functions
         .filter(f => f.deprecated_since === undefined)
